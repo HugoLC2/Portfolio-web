@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- viewport permite adaptar la pagina a la pantalla del dispositivo -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi portfolio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="zoom-controls">
+        <label for="zoom">Zoom: <span id="zoom-value">55%</span></label>
+        <input
+            type="range"
+            id="zoom"
+            min="20"
+            max="100"
+            value="55"
+            step="1"
+        >
+        <button id="reset-zoom" type="button">Restablecer</button>
+    </div>
+
+    <main class="portfolio">
+        <img src="images/Img_1.png" alt="Portfolio - Imagen 1">
+        <img src="images/Img_2.png" alt="Portfolio - Imagen 2">
+        <img src="images/Img_3.png" alt="Portfolio - Imagen 3">
+        <img src="images/Img_4.png" alt="Portfolio - Imagen 4">
+        <img src="images/Img_5.png" alt="Portfolio - Imagen 5">
+        <img src="images/Img_6.png" alt="Portfolio - Imagen 6">
+    </main>
+    
+    <script>
+        const zoomSlider = document.getElementById("zoom");
+        const zoomValue = document.getElementById("zoom-value");
+        const resetButton = document.getElementById("reset-zoom");
+        const images = document.querySelectorAll(".portfolio img");
+        const mobileView = window.matchMedia("(max-width: 600px)");
+
+        function getDefaultZoom() {
+            return mobileView.matches ? 100 : 55;
+        }
+
+        function updateZoom() {
+            const zoom = Number(zoomSlider.value);
+
+            // Usar el centro de la pantalla como punto de referencia
+            const anchorY = window.innerHeight / 2;
+
+            // Identificar la imagen que ocupa ese punto
+            let anchorImage = null;
+
+            images.forEach(function (image) {
+                const rect = image.getBoundingClientRect();
+
+                if (rect.top <= anchorY && rect.bottom >= anchorY) {
+                    anchorImage = image;
+                }
+            });
+
+            // Guardar la posición relativa del punto dentro de la imagen
+            let anchorRatio = 0;
+
+            if (anchorImage) {
+                const rect = anchorImage.getBoundingClientRect();
+                anchorRatio = (anchorY - rect.top) / rect.height;
+            }
+
+            // Aplicar el nuevo tamaño
+            images.forEach(function (image) {
+                image.style.width = zoom + "%";
+            });
+
+            zoomValue.textContent = zoom + "%";
+
+            // Recolocar el mismo punto después de actualizar el diseño
+            requestAnimationFrame(function () {
+                if (!anchorImage) return;
+
+                const rect = anchorImage.getBoundingClientRect();
+                const newAnchorY = rect.top + rect.height * anchorRatio;
+                const scrollAdjustment = newAnchorY - anchorY;
+
+                window.scrollBy(0, scrollAdjustment);
+            });
+        }
+
+        zoomSlider.addEventListener("input", updateZoom);
+
+        resetButton.addEventListener("click", function () {
+            zoomSlider.value = getDefaultZoom();
+            updateZoom();
+        });
+
+        zoomSlider.value = getDefaultZoom();
+        updateZoom();
+    </script>
+
+</body>
+</html>
